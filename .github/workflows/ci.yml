@@ -30,9 +30,55 @@ jobs:
         with:
           terraform_version: 1.9.8
 
-    # 3. Configure AWS credentials
+    # 3. Configure OIDC
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: "${{ secrets.AWS_ROLE_ARN }}"
           aws-region: "${{ vars.AWS_REGION }}"
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.9.8"
+    # 4. Scan and format
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check -recursive -diff || (echo "Formating issues found. Please run 'terraform fmt' locally.")
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: TFLint - Terraform Linter
+        uses: terraform-linters/setup-tflint@v3
+        with:
+          tflint_version: v0.50.3
+      
+      - name: Run TFLint
+        run: tflint --init && tflint
+        working-directory: ${{ env.TF_WORKING_DIR }}
+      
+      - name: Checkov Scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: ${{ env.TF_WORKING_DIR }}
+          framework: terraform
+          quiet: true  
+      
+      - name: Terraform Init with Upgrade
+        run: terraform init -upgrade
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      # - name: Terraform Validate
+      #   id: validate
+      #   run: terraform validate -no-color
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+
+      # - name: Terraform Plan
+      #   id: plan
+      #   run: terraform plan -no-color -input=false
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+
+      # # Optional: Auto-apply on main branch
+      # - name: Terraform Apply
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #   run: terraform apply -auto-approve -input=false
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
