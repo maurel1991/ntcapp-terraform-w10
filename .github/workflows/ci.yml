@@ -1,10 +1,8 @@
 name: Terraform CI/CD
 
 on:
-  # workflow_dispacth
   push:
-    branches:
-      - main
+    branches: ["main"]
   pull_request:
     branches:
       - main
@@ -15,11 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      AWS_REGION: ${{vars.AWS_REGION}}
+      AWS_REGION: "${{ vars.AWS_REGION}}"
       TF_WORKING_DIR: ./terraform # path to your Terraform config
 
     steps:
-      # 1. Checkout repository
+    # 1. Checkout repository
       - name: Checkout repo
         uses: actions/checkout@v3
     # 2. Setup Terraform
@@ -28,10 +26,9 @@ jobs:
         with:
           terraform_version: 1.9.8
 
-      # 3. Configure AWS credentials
+    # 3. Configure AWS credentials
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
-
+          role-to-assume: "${{ secrets.AWS_ROLE_ARN }}"
+          aws-region: "${{ vars.AWS_REGION }}"
