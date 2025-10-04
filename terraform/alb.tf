@@ -39,9 +39,9 @@ resource "aws_lb_target_group_attachment" "name2" {
 #########################
 # S3 Bucket for ALB Logs (minimal)
 #########################
-resource "aws_s3_bucket" "alb_logs" {
-  bucket = "ola_bucket_Jamafrik-1991" # change pour un nom unique
-}
+# resource "aws_s3_bucket" "alb_logs" {
+#   bucket = "ola_bucket_Jamafrik-1991" # change pour un nom unique
+# }
 
 #########################
 # Application Load Balancer
@@ -55,11 +55,11 @@ resource "aws_lb" "name" {
 
   drop_invalid_header_fields = true
 
-  access_logs {
-    bucket  = aws_s3_bucket.alb_logs.bucket
-    enabled = true
-    prefix  = "alb-logs"
-  }
+#   access_logs {
+#     bucket  = aws_s3_bucket.alb_logs.bucket
+#     enabled = true
+#     prefix  = "alb-logs"
+#   }
 }
 
 
