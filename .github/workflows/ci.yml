@@ -21,27 +21,29 @@ jobs:
       TF_WORKING_DIR: ./terraform # path to your Terraform config
 
     steps:
-    # 1. Checkout repository
+      # 1. Checkout repository
       - name: Checkout repo
         uses: actions/checkout@v3
-    # 2. Setup Terraform
+
+      # 2. Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.9.8
 
-    # 3. Configure OIDC
+      # 3. Configure OIDC
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: "${{ secrets.AWS_ROLE_ARN }}"
           aws-region: "${{ vars.AWS_REGION }}"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: "1.9.8"
-    # 4. Scan and format
 
+      # 4. Scan and format
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check -recursive -diff || (echo "Formating issues found. Please run 'terraform fmt' locally.")
@@ -51,11 +53,11 @@ jobs:
         uses: terraform-linters/setup-tflint@v3
         with:
           tflint_version: v0.50.3
-      
+
       - name: Run TFLint
         run: tflint --init && tflint
         working-directory: ${{ env.TF_WORKING_DIR }}
-      
+
       - name: Checkov Scan
         uses: bridgecrewio/checkov-action@master
         with:
@@ -63,7 +65,7 @@ jobs:
           framework: terraform
           quiet: true
           soft_fail: true  
-      
+
       - name: Terraform Init with Upgrade
         run: terraform init -upgrade
         working-directory: ${{ env.TF_WORKING_DIR }}
@@ -77,18 +79,21 @@ jobs:
         id: plan
         run: terraform plan -no-color -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
-        
+
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
 
-      - name: Wait for 15 minutes
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          echo "Waiting for 15 minutes before destruction..."
-          sleep 900
-          echo "15 minutes elapsed, proceeding with destruction..."
+  # The wait-for-approval Job - manual approval implemented with the environment approval feature
+  wait-for-approval:
+    runs-on: ubuntu-latest
+    needs: terraform
+    environment:
+      name: destroy-approval # Environment requiring manual approval
+    steps:
+      - name: Wait for Approval
+        run: echo "Waiting for manual approval to destroy resources..."
 
       - name: Terraform Destroy
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
