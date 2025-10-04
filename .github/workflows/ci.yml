@@ -84,21 +84,27 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
-
-  # The wait-for-approval Job - manual approval implemented with the environment approval feature
-  wait-for-approval:
-    runs-on: ubuntu-latest
-    needs: terraform
-    environment:
-      name: destroy-approval # Environment requiring manual approval
-    steps:
-      - name: Wait for Approval
-        run: echo "Waiting for manual approval to destroy resources..."
-
+        
       - name: Terraform Destroy
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform destroy -auto-approve -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
+
+
+  # # The wait-for-approval Job - manual approval implemented with the environment approval feature
+  # wait-for-approval:
+  #   runs-on: ubuntu-latest
+  #   needs: terraform
+  #   environment:
+  #     name: destroy-approval # Environment requiring manual approval
+  #   steps:
+  #     - name: Wait for Approval
+  #       run: echo "Waiting for manual approval to destroy resources..."
+
+  #     - name: Terraform Destroy
+  #       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #       run: terraform destroy -auto-approve -input=false
+  #       working-directory: ${{ env.TF_WORKING_DIR }}
 
       # # Optional: Auto-apply on main branch
       # - name: Terraform Apply
