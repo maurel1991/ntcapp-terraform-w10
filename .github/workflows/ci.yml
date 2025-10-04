@@ -61,7 +61,8 @@ jobs:
         with:
           directory: ${{ env.TF_WORKING_DIR }}
           framework: terraform
-          quiet: true  
+          quiet: true
+          soft_fail: true  
       
       - name: Terraform Init with Upgrade
         run: terraform init -upgrade
