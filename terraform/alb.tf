@@ -40,7 +40,7 @@ resource "aws_lb_target_group_attachment" "name2" {
 # S3 Bucket for ALB Logs (minimal)
 #########################
 resource "aws_s3_bucket" "alb_logs" {
-  bucket = "ola_bucket_Jamafrik" # change pour un nom unique
+  bucket = "ola_bucket_Jamafrik-1991" # change pour un nom unique
 }
 
 #########################
