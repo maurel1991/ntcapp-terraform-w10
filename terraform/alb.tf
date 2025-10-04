@@ -1,37 +1,37 @@
 // target group
 
 resource "aws_lb_target_group" "tg1" {
-    name = "ntc-tg"
-    port = 80
-    protocol = "HTTP"
-    target_type = "instance"
-    vpc_id = aws_vpc.my-vpc.id
+  name        = "ntc-tg"
+  port        = 80
+  protocol    = "HTTP"
+  target_type = "instance"
+  vpc_id      = aws_vpc.my-vpc.id
 
-    health_check {
-      enabled = true
-      healthy_threshold = 3
-      interval = 10
-      matcher = 200
-      path = "/"
-      port = "traffic-port"
-      timeout = 6
-      unhealthy_threshold = 3
-    }
-    depends_on = [ aws_vpc.my-vpc ]
+  health_check {
+    enabled             = true
+    healthy_threshold   = 3
+    interval            = 10
+    matcher             = 200
+    path                = "/"
+    port                = "traffic-port"
+    timeout             = 6
+    unhealthy_threshold = 3
+  }
+  depends_on = [aws_vpc.my-vpc]
 }
 
 # attach ec2 to target group
 resource "aws_lb_target_group_attachment" "name1" {
-    target_group_arn = aws_lb_target_group.tg1.id
-    target_id = aws_instance.server1.id 
-    port = 80
-  
+  target_group_arn = aws_lb_target_group.tg1.id
+  target_id        = aws_instance.server1.id
+  port             = 80
+
 }
 resource "aws_lb_target_group_attachment" "name2" {
-    target_group_arn = aws_lb_target_group.tg1.id
-    target_id = aws_instance.server2.id 
-    port = 80
-  
+  target_group_arn = aws_lb_target_group.tg1.id
+  target_id        = aws_instance.server2.id
+  port             = 80
+
 }
 
 # ALoadBalancer
@@ -40,17 +40,17 @@ resource "aws_lb_target_group_attachment" "name2" {
 # S3 Bucket for ALB Logs (minimal)
 #########################
 resource "aws_s3_bucket" "alb_logs" {
-  bucket = "ola_bucket_Jamafrik"  # change pour un nom unique
+  bucket = "ola_bucket_Jamafrik" # change pour un nom unique
 }
 
 #########################
 # Application Load Balancer
 #########################
 resource "aws_lb" "name" {
-  name               = "ntc-alb"
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = [aws_subnet.public1.id, aws_subnet.public2.id]
+  name                       = "ntc-alb"
+  load_balancer_type         = "application"
+  security_groups            = [aws_security_group.alb_sg.id]
+  subnets                    = [aws_subnet.public1.id, aws_subnet.public2.id]
   enable_deletion_protection = false
 
   drop_invalid_header_fields = true
@@ -67,11 +67,11 @@ resource "aws_lb" "name" {
 # create listener
 
 resource "aws_lb_listener" "name" {
-    load_balancer_arn = aws_lb.name.id
-    port = 80
-    protocol = "HTTP"
-    default_action {
-      type = "forward"
-      target_group_arn = aws_lb_target_group.tg1.arn
-    } 
+  load_balancer_arn = aws_lb.name.id
+  port              = 80
+  protocol          = "HTTP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.tg1.arn
+  }
 }
