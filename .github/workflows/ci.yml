@@ -68,10 +68,10 @@ jobs:
         run: terraform init -upgrade
         working-directory: ${{ env.TF_WORKING_DIR }}
 
-      # - name: Terraform Validate
-      #   id: validate
-      #   run: terraform validate -no-color
-      #   working-directory: ${{ env.TF_WORKING_DIR }}
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ${{ env.TF_WORKING_DIR }}
 
       # - name: Terraform Plan
       #   id: plan
