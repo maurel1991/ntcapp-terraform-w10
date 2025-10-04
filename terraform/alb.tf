@@ -36,6 +36,16 @@ resource "aws_lb_target_group_attachment" "name2" {
 
 # ALoadBalancer
 
+#########################
+# S3 Bucket for ALB Logs (minimal)
+#########################
+resource "aws_s3_bucket" "alb_logs" {
+  bucket = "ola_bucket_Jamafrik"  # change pour un nom unique
+}
+
+#########################
+# Application Load Balancer
+#########################
 resource "aws_lb" "name" {
   name               = "ntc-alb"
   load_balancer_type = "application"
@@ -44,7 +54,14 @@ resource "aws_lb" "name" {
   enable_deletion_protection = false
 
   drop_invalid_header_fields = true
+
+  access_logs {
+    bucket  = aws_s3_bucket.alb_logs.bucket
+    enabled = true
+    prefix  = "alb-logs"
+  }
 }
+
 
 
 # create listener
